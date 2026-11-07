@@ -1,0 +1,14 @@
+flowchart TD
+ A[Email / Chat / Portal] --> B[FastAPI Support API]
+ B --> C[Ticket Store and Audit]
+ B --> D[Clocked Injection]
+ D --> E[Clocked PII]
+ E --> F[Clocked Extract and Decide]
+ F --> G[TypeLLM Workflow]
+ G --> H[Payment Adapter]
+ H --> I[Verified Transaction Evidence]
+ I --> J[Finance Approval]
+ J --> K[Refund Adapter]
+ K --> L[Clocked Grounding]
+ L --> M[Customer Reply]
+ M --> C

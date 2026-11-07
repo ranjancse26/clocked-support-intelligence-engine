@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clocked Support Intelligence Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Theme init: set data-theme before body paints to avoid a flash of the wrong theme -->
+  <script>
+    (function () {
+      var html = document.documentElement;
+      var stored = localStorage.getItem("clocked-theme") || "system";
+      if (stored === "system") {
+        html.removeAttribute("data-theme");
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          html.dataset.theme = "dark";
+        }
+      } else {
+        html.dataset.theme = stored;
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 200 200" fill="none">
+          <defs>
+            <linearGradient id="clockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#6366f1" />
+              <stop offset="100%" stop-color="#22d3ee" />
+            </linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <circle cx="100" cy="100" r="78" stroke="url(#clockGrad)" stroke-width="10" fill="none" stroke-linecap="round" />
+          <circle cx="100" cy="100" r="78" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.15" />
+          <g stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.5">
+            <line x1="100" y1="26" x2="100" y2="36" />
+            <line x1="100" y1="164" x2="100" y2="174" />
+            <line x1="26" y1="100" x2="36" y2="100" />
+            <line x1="164" y1="100" x2="174" y2="100" />
+            <line x1="58.6" y1="58.6" x2="66.2" y2="66.2" />
+            <line x1="133.8" y1="133.8" x2="141.4" y2="141.4" />
+            <line x1="58.6" y1="141.4" x2="66.2" y2="133.8" />
+            <line x1="133.8" y1="58.6" x2="141.4" y2="66.2" />
+            <line x1="78.6" y1="30.8" x2="84.2" y2="34.6" />
+            <line x1="115.8" y1="165.4" x2="121.4" y2="161.4" />
+            <line x1="30.8" y1="121.4" x2="34.6" y2="115.8" />
+            <line x1="165.4" y1="78.6" x2="161.4" y2="84.2" />
+          </g>
+          <path d="M 100 100 L 132 42 L 158 42 L 158 98 L 132 98 Z" fill="#ffffff" opacity="0.9" />
+          <path d="M 100 100 L 132 42" stroke="#6366f1" stroke-width="7" stroke-linecap="round" fill="none" />
+          <g fill="#ffffff" opacity="0.6">
+            <circle cx="133" cy="50" r="1.8" />
+            <circle cx="133" cy="60" r="1.8" />
+            <circle cx="133" cy="70" r="1.8" />
+            <circle cx="133" cy="80" r="1.8" />
+            <circle cx="133" cy="90" r="1.8" />
+          </g>
+          <circle cx="100" cy="100" r="6" fill="#22d3ee" filter="url(#glow)" />
+          <circle cx="100" cy="100" r="10" stroke="#22d3ee" stroke-width="2" fill="none" opacity="0.6" />
+          <line x1="100" y1="100" x2="122" y2="72" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.9" />
+        </svg>
+      </div>
+      <div class="brand-text">Clocked <span>Support</span> Intelligence</div>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-section="dashboard">Dashboard</a>
+      <a href="#" class="nav-link" data-section="demo-scenarios">Demo Scenarios</a>
+      <a href="#" class="nav-link" data-section="ticket-analysis">Ticket Analysis</a>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn ghost" id="btnThemeToggle" aria-pressed="false" title="Switch theme">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark mode</span>
+      </button>
+      <button class="nav-btn ghost" id="btnAbout">About</button>
+      <button class="nav-btn primary" id="btnApiRefs">API References</button>
+    </div>
+    <div class="nav-status" id="navStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to API...</span>
+    </div>
+  </nav>
+
+  <!-- Main container -->
+  <main class="app">
+    <section id="section-dashboard" class="section active">
+      <div class="section-header">
+        <h1>Support Ticket Intelligence</h1>
+        <p>Submit, analyze, and resolve support tickets powered by Clocked &amp; TypeLLM.</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Submit Card -->
+        <div class="card submit-card">
+          <div class="card-header">
+            <span class="badge badge-blue">Submit Ticket</span>
+            <h2>New Support Ticket</h2>
+          </div>
+          <form id="ticketForm" class="ticket-form">
+            <div class="form-group">
+              <label>Subject <span class="required">*</span></label>
+              <input type="text" name="subject" placeholder="e.g. Charged twice for Pro plan" required />
+            </div>
+            <div class="form-group full">
+              <label>Message / Body <span class="required">*</span></label>
+              <textarea name="body" rows="5" placeholder="Describe the issue in detail..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Customer ID</label>
+              <input type="text" name="customer_id" value="CUS-DEMO" />
+            </div>
+            <button type="submit" class="btn-submit" id="btnSubmit">
+              <span class="btn-label">Analyze Ticket</span>
+              <span class="btn-icon">&#9654;</span>
+            </button>
+          </form>
+          <div class="form-hint">
+            Tip: Try "Charged twice for Pro renewal, $99 each" to trigger a billing flow.
+          </div>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="stats-column">
+          <div class="stat-card">
+            <div class="stat-value" id="statTickets">0</div>
+            <div class="stat-label">Tickets Processed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statRefunds">$0</div>
+            <div class="stat-label">Refunds Issued</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statQuarantine">0</div>
+            <div class="stat-label">Quarantined (Injection)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statMode">MOCK</div>
+            <div class="stat-label">API Mode</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo Scenarios Section -->
+    <section id="section-demo-scenarios" class="section">
+      <div class="section-header">
+        <h1>Demo Scenarios</h1>
+        <p>Click any scenario to auto-fill and run an end-to-end ticket submission and analysis.</p>
+      </div>
+      <div class="scenario-grid" id="scenarioGrid"></div>
+    </section>
+
+    <!-- Ticket Analysis Section -->
+    <section id="section-ticket-analysis" class="section">
+      <div class="section-header">
+        <h1>Ticket Analysis</h1>
+        <p>Review processed tickets, audit trails, and finance decisions.</p>
+      </div>
+      <div class="analysis-controls">
+        <input type="text" id="ticketIdInput" placeholder="Enter Ticket ID (e.g. SUP-A1B2C3D4E5F6)" />
+        <button class="btn-primary" id="btnLoadTicket">Load Ticket</button>
+        <button class="btn-outline" id="btnRecent">Recent Tickets</button>
+      </div>
+
+      <!-- Processed tickets grid -->
+      <div class="tickets-grid-header">
+        <h2>Processed Tickets</h2>
+        <p>All existing processed tickets. Click any ticket to open its full analysis.</p>
+      </div>
+      <div class="tickets-grid" id="ticketsGrid"></div>
+      <div id="ticketsEmpty" class="empty-state" style="height:auto; padding:40px 0; display:none;">
+        <div class="empty-icon">&#128202;</div>
+        <h3>No processed tickets yet</h3>
+        <p>Submit a ticket or run a demo scenario to see processed tickets here.</p>
+      </div>
+
+      <div class="ticket-view" id="ticketView">
+        <div class="empty-state">
+          <div class="empty-icon">&#128202;</div>
+          <h3>No ticket selected</h3>
+          <p>Enter a Ticket ID above or run a demo scenario to view full analysis.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- API References Modal -->
+  <div class="modal" id="modalApiRefs">
+    <div class="modal-backdrop" id="backdropApiRefs"></div>
+    <div class="modal-content modal-wide">
+      <button class="modal-close" id="closeApiRefs">&times;</button>
+      <div class="modal-body">
+          <div class="modal-header">
+            <div class="modal-icon api-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 200 200" fill="none">
+                <defs>
+                  <linearGradient id="clockGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#6366f1" />
+                    <stop offset="100%" stop-color="#22d3ee" />
+                  </linearGradient>
+                  <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <circle cx="100" cy="100" r="78" stroke="url(#clockGrad2)" stroke-width="10" fill="none" stroke-linecap="round" />
+                <circle cx="100" cy="100" r="78" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.15" />
+                <g stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.5">
+                  <line x1="100" y1="26" x2="100" y2="36" />
+                  <line x1="100" y1="164" x2="100" y2="174" />
+                  <line x1="26" y1="100" x2="36" y2="100" />
+                  <line x1="164" y1="100" x2="174" y2="100" />
+                  <line x1="58.6" y1="58.6" x2="66.2" y2="66.2" />
+                  <line x1="133.8" y1="133.8" x2="141.4" y2="141.4" />
+                  <line x1="58.6" y1="141.4" x2="66.2" y2="133.8" />
+                  <line x1="133.8" y1="58.6" x2="141.4" y2="66.2" />
+                  <line x1="78.6" y1="30.8" x2="84.2" y2="34.6" />
+                  <line x1="115.8" y1="165.4" x2="121.4" y2="161.4" />
+                  <line x1="30.8" y1="121.4" x2="34.6" y2="115.8" />
+                  <line x1="165.4" y1="78.6" x2="161.4" y2="84.2" />
+                </g>
+                <path d="M 100 100 L 132 42 L 158 42 L 158 98 L 132 98 Z" fill="#ffffff" opacity="0.9" />
+                <path d="M 100 100 L 132 42" stroke="#6366f1" stroke-width="7" stroke-linecap="round" fill="none" />
+                <g fill="#ffffff" opacity="0.6">
+                  <circle cx="133" cy="50" r="1.8" />
+                  <circle cx="133" cy="60" r="1.8" />
+                  <circle cx="133" cy="70" r="1.8" />
+                  <circle cx="133" cy="80" r="1.8" />
+                  <circle cx="133" cy="90" r="1.8" />
+                </g>
+                <circle cx="100" cy="100" r="6" fill="#22d3ee" filter="url(#glow2)" />
+                <circle cx="100" cy="100" r="10" stroke="#22d3ee" stroke-width="2" fill="none" opacity="0.6" />
+                <line x1="100" y1="100" x2="122" y2="72" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.9" />
+              </svg>
+            </div>
+            <div>
+              <h2>API References</h2>
+              <div class="modal-tag">Clocked &bull; TypeLLM</div>
+            </div>
+          </div>
+
+        <div class="api-tabs">
+          <button class="api-tab active" data-tab="clocked">Clocked</button>
+          <button class="api-tab" data-tab="typellm">TypeLLM</button>
+          <button class="api-tab" data-tab="endpoints">Backend Endpoints</button>
+        </div>
+
+        <!-- Clocked Panel -->
+        <div class="api-panel active" id="panel-clocked">
+          <h3>Clocked APIs</h3>
+          <p>Clocked inspects and protects untrusted support content before any LLM or business logic runs. Every method accepts the raw ticket text (or evidence documents) and returns a structured verdict. In mock mode, all calls are deterministic - no external network calls are made.</p>
+
+          <div class="api-table-wrap">
+            <table class="api-table">
+              <thead>
+                <tr><th>Method</th><th>Purpose</th><th>Input</th><th>Mock Behavior</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>injection(text)</code></td>
+                  <td>Prompt-injection / jailbreak guard on the raw ticket body. Runs first; suspicious tickets are quarantined before PII, extract, decide, or TypeLLM ever run.</td>
+                  <td><code>text</code> (string) - raw untrusted ticket body</td>
+                  <td>Flags patterns: "ignore all previous instructions", "bypass the refund policy", "reveal your system prompt". Returns verdict <code>clear</code> / <code>suspicious</code> with an <code>injection</code> boolean and <code>mock: true</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>pii(text)</code></td>
+                  <td>Detects and anonymizes PII (person, email, phone, address, credit_card, username) in text used downstream.</td>
+                  <td><code>text</code> (string)</td>
+                  <td>Returns anonymized text unchanged; notes no real PII detection in mock. Returns <code>{anonymized_text, mock: true}</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>extract(text, fields)</code></td>
+                  <td>Extracts structured fields from free text: issue_summary, category_hint, urgency_hint, request_type, amounts, payment_method_type, refund_requested, currency, entities.</td>
+                  <td><code>text</code> (string), <code>fields</code> (object of field descriptions)</td>
+                  <td>Regex-extracts $ amounts, "twice"/duplicate count, "refund" keyword, plan names, company card, currency. Returns <code>{fields: {...}, mock: true}</code>; unextractable fields are <code>null</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>decide(state, questions)</code></td>
+                  <td>Boolean billing decisions: is_billing_issue, is_technical_issue, is_account_issue, refund_requested, urgent.</td>
+                  <td><code>state</code> (string), <code>questions</code> (object of question names)</td>
+                  <td>Keyword-based answers from ticket text. Returns <code>{answers: {...}, mock: true}</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>grounding(documents, question, answer)</code></td>
+                  <td>Verifies a customer-facing refund reply against supporting evidence documents before sending.</td>
+                  <td><code>documents</code> (array of {text}), <code>question</code> (string), <code>answer</code> (string)</td>
+                  <td>Returns <code>supported</code> if the reply mentions successful processing and a document shows <code>status: succeeded</code>; otherwise <code>review_required</code>. Returns <code>mock: true</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="api-example">
+            <h4>Usage Example (mock mode)</h4>
+            <pre><code>from app.adapters.clocked import ClockedAdapter
+
+clocked = ClockedAdapter()  # mock_mode=true by default
+
+raw = "Subject: Billed twice\n\nI was charged $49.00 twice for my Pro plan."
+
+# 1. Injection guard - run first on raw untrusted input
+guard = clocked.injection(raw)
+# -> {"verdict": "clear", "injection": false, "mock": true}
+
+# 2. PII protection
+pii = clocked.injection(raw)  # then clocked.pii(raw)
+# -> {"anonymized_text": raw, "mock": true}
+
+# 3. Structured extraction
+extracted = clocked.extract(raw, {
+    "issue_summary": {"description": "Concise customer issue summary"},
+    "amounts": {"description": "Any dollar amounts mentioned"},
+})
+# -> {"fields": {"issue_summary": "refund requested", "amounts": [49.0], ...}, "mock": true}
+
+# 4. Boolean decisions
+decision = clocked.decide(raw)
+# -> {"answers": {"is_billing_issue": true, "refund_requested": true, ...}, "mock": true}
+
+# 5. Grounding the customer-facing reply
+grounding = clocked.grounding(
+    documents=[{"text": "Refund TXN-10002 status: succeeded"}],
+    question="Was the duplicate charge refunded?",
+    answer="Your duplicate charge of $49.00 was successfully refunded.",
+)
+# -> {"verdict": "supported", "mock": true}</code></pre>
+          </div>
+
+          <br/>
+
+          <div class="api-note">
+            <strong>Live mode:</strong> set <code>MOCK_MODE=false</code> and <code>CLOCKED_API_KEY</code>. Uses the <code>clocked-sdk</code> <code>Clocked</code> client. Base URL default: <code>https://clocked.rezolve.ai/clocked</code>. Methods map to <code>client.injection</code>, <code>client.pii</code>, <code>client.extract</code>, <code>client.decide</code>, <code>client.grounding</code>.
+          </div>
+        </div>
+
+        <!-- TypeLLM Panel -->
+        <div class="api-panel hidden" id="panel-typellm">
+          <h3>TypeLLM Typed Workflow</h3>
+          <p>TypeLLM classifies tickets with typed questions, dependencies, <code>source: user</code> fields, and <code>generate()</code>/<code>resume()</code> turns. It produces reliable, typed classification rather than free-form LLM output, and cleanly separates model-inferred fields from externally-verified facts. <strong>Refund decisions are never based solely on model output.</strong></p>
+
+          <div class="api-table-wrap">
+            <table class="api-table">
+              <thead>
+                <tr><th>Question</th><th>Type</th><th>Depends On / Source</th><th>Purpose</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>category</code></td>
+                  <td>string (enum)</td>
+                  <td>-</td>
+                  <td>Classify the primary support issue: <code>billing</code>, <code>technical</code>, <code>account</code>, <code>other</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>urgent</code></td>
+                  <td>boolean</td>
+                  <td>-</td>
+                  <td>Priority handling; urgency does not authorize a refund.</td>
+                </tr>
+                <tr>
+                  <td><code>handling_advice</code></td>
+                  <td>string</td>
+                  <td>depends_on: category, urgent</td>
+                  <td>One internal next step; verify payment records before refund decisions.</td>
+                </tr>
+                <tr>
+                  <td><code>duplicate_confirmed</code></td>
+                  <td>boolean</td>
+                  <td>source: user, when: category=billing</td>
+                  <td>Trusted provider duplicate evidence; true only when the payment provider confirms a duplicate charge.</td>
+                </tr>
+                <tr>
+                  <td><code>refund_amount</code></td>
+                  <td>number</td>
+                  <td>source: user, when: category=billing &amp; duplicate_confirmed=true</td>
+                  <td>Application-calculated refund amount from the payment adapter; never inferred from the customer message.</td>
+                </tr>
+                <tr>
+                  <td><code>reply</code></td>
+                  <td>string</td>
+                  <td>depends_on: category, urgent</td>
+                  <td>Concise customer reply; never claim refund approval or completion without evidence.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="api-table-wrap" style="margin-top:0;">
+            <table class="api-table">
+              <thead>
+                <tr><th>Contract</th><th>Mock Behavior</th><th>Live Behavior</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>generate(context, questions)</code></td>
+                  <td>Returns <code>{status, result, needs_input, resume_state: "mock"}</code>. Billing tickets return <code>status: "needs_input"</code> with <code>needs_input: ["duplicate_confirmed"]</code>; non-billing return <code>status: "completed"</code>.</td>
+                  <td>Calls <code>TypeLLMClient.generate(context=context, questions=questions())</code>. Returns the SDK generation object; persist via the SDK's supported serialization (do not pickle).</td>
+                </tr>
+                <tr>
+                  <td><code>resume(response, answers)</code></td>
+                  <td>Merges <code>answers</code> into the result. If <code>duplicate_confirmed</code> is true and <code>refund_approved</code> is absent, returns <code>status: "needs_input"</code> waiting on <code>refund_approved</code>; otherwise <code>status: "completed"</code>.</td>
+                  <td>Calls <code>client.resume(response, answers)</code> with the live SDK response object and resolved <code>source: "user"</code> values.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="api-flow">
+            <h4>Workflow</h4>
+            <div class="flow-steps">
+              <div class="flow-step">generate()<br><small>context + typed questions</small></div>
+              <div class="flow-arrow">&#8594;</div>
+              <div class="flow-step">Collect <code>source: user</code><br><small>answers from payment evidence</small></div>
+              <div class="flow-arrow">&#8594;</div>
+              <div class="flow-step">resume()<br><small>continue workflow to completion</small></div>
+            </div>
+          </div>
+
+          <div class="api-example">
+            <h4>Usage Example</h4>
+            <pre><code># 1. First turn - classify and collect source:user fields
+response = client.generate(
+    context=ticket_text,
+    questions=[
+        Question(name="category", type="string", enum=["billing","technical","account","other"]),
+        Question(name="urgent", type="boolean"),
+        Question(name="handling_advice", type="string", depends_on=["category","urgent"]),
+        Question(name="duplicate_confirmed", type="boolean", source="user", when={"category":"billing"}),
+        Question(name="refund_amount", type="number", source="user", when={"category":"billing","duplicate_confirmed": True}),
+        Question(name="reply", type="string", depends_on=["category","urgent"]),
+    ]
+)
+
+# 2. Resolve external facts from the payment provider (authoritative evidence)
+duplicate_confirmed = payment_adapter.check_duplicate(ticket)
+refund_amount = payment_adapter.compute_refund(ticket)
+
+# 3. Second turn - resume to completion
+final = client.resume(response, {
+    "duplicate_confirmed": duplicate_confirmed,
+    "refund_amount": refund_amount,
+})</code></pre>
+          </div>
+
+          <div class="api-example">
+            <h4>Mock generate() response (billing ticket)</h4>
+            <pre><code>{
+  "status": "needs_input",
+  "result": {
+    "category": "billing",
+    "urgent": true,
+    "handling_advice": "Verify provider transactions before refund consideration.",
+    "reply": "I'm sorry about the billing issue; our team is checking the payment records."
+  },
+  "needs_input": ["duplicate_confirmed"],
+  "skipped": [],
+  "resume_state": "mock"
+}</code></pre>
+          </div>
+
+          <br/>
+          
+          <div class="api-note">
+            <strong>Live mode:</strong> requires <code>TYPELLM_API_KEY</code> and uses <code>TypeLLMClient.generate()</code> and <code>client.resume()</code>. External values are declared as <code>source: "user"</code> and resumed with the live SDK response object. For multi-worker production deployments, persist and restore workflow state only through a documented TypeLLM-supported mechanism - do not rely on in-memory objects across restarts.
+          </div>
+        </div>
+
+        <!-- Backend Endpoints Panel -->
+        <div class="api-panel hidden" id="panel-endpoints">
+          <h3>Backend API Endpoints</h3>
+          <p>FastAPI server runs on <code id="apiBaseUrl">http://127.0.0.1:8000</code> (interactive docs at <code>/docs</code>). All endpoints return JSON. Default <code>MOCK_MODE=true</code> simulates Clocked, TypeLLM, and payment responses - no real money moves and no external network calls.</p>
+
+          <div class="api-table-wrap">
+            <table class="api-table">
+              <thead>
+                <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/health</code></td>
+                  <td>GET</td>
+                  <td>Health check; returns status and <code>mock_mode</code> flag.</td>
+                </tr>
+                <tr>
+                  <td><code>/stats</code></td>
+                  <td>GET</td>
+                  <td>Aggregate stats: tickets processed, refunds issued, quarantined count.</td>
+                </tr>
+                <tr>
+                  <td><code>/tickets</code></td>
+                  <td>POST</td>
+                  <td>Create and process a support ticket (subject, body, customer_id). Runs the full Clocked + TypeLLM pipeline.</td>
+                </tr>
+                <tr>
+                  <td><code>/tickets</code></td>
+                  <td>GET</td>
+                  <td>List processed tickets (query: <code>limit</code>, <code>offset</code>). Ordered newest first.</td>
+                </tr>
+                <tr>
+                  <td><code>/tickets/{ticket_id}</code></td>
+                  <td>GET</td>
+                  <td>Retrieve a processed ticket with Clocked &amp; TypeLLM results.</td>
+                </tr>
+                <tr>
+                  <td><code>/tickets/{ticket_id}/approval</code></td>
+                  <td>POST</td>
+                  <td>Finance decision: <code>approved</code>, <code>rejected</code>, or <code>needs_information</code>. Returns <code>409 Conflict</code> if already decided.</td>
+                </tr>
+                <tr>
+                  <td><code>/tickets/{ticket_id}/audit</code></td>
+                  <td>GET</td>
+                  <td>Full audit trail of events for a ticket.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="api-example">
+            <h4>Create Ticket (POST /tickets)</h4>
+            <pre><code>POST /tickets
+Content-Type: application/json
+
+{
+  "subject": "Charged twice this month",
+  "body": "I upgraded to Pro on the 3rd and my card was charged twice, $49 each time.",
+  "customer_id": "CUS-DEMO-1025"
+}</code></pre>
+            <p style="font-size:0.82rem; color:var(--color-ink-dim); margin-top:8px;">
+              Response includes <code>id</code> (e.g. <code>SUP-A1B2C3D4E5F6</code>), <code>status</code>, <code>category</code>, <code>clocked_results</code>, <code>extracted</code>, <code>payment_evidence</code>, <code>refund_amount</code>, <code>final_reply</code>.
+            </p>
+          </div>
+
+          <div class="api-example">
+            <h4>Finance Decision (POST /tickets/{id}/approval)</h4>
+            <pre><code>POST /tickets/SUP-A1B2C3D4E5F6/approval
+Content-Type: application/json
+
+{
+  "decision": "approved",
+  "reviewer_id": "finance.manager@example.com",
+  "reason": "Provider duplicate reference verified; second charge confirmed"
+}</code></pre>
+            <p style="font-size:0.82rem; color:var(--color-ink-dim); margin-top:8px;">
+              <code>decision</code>: <code>approved</code> | <code>rejected</code> | <code>needs_information</code>. A second decision on an already-decided ticket returns <code>409 Conflict</code>.
+            </p>
+          </div>
+
+          <div class="api-example">
+            <h4>cURL examples</h4>
+            <pre><code># Health
+curl http://127.0.0.1:8000/health
+
+# Create a ticket
+curl -X POST http://127.0.0.1:8000/tickets \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"Charged twice this month","body":"I was charged $49 twice for my Pro plan.","customer_id":"CUS-DEMO-1025"}'
+
+# Finance approval
+curl -X POST http://127.0.0.1:8000/tickets/SUP-A1B2C3D4E5F6/approval \
+  -H "Content-Type: application/json" \
+  -d '{"decision":"approved","reviewer_id":"finance.manager@example.com","reason":"Duplicate confirmed"}'
+
+# Audit trail
+curl http://127.0.0.1:8000/tickets/SUP-A1B2C3D4E5F6/audit</code></pre>
+          </div>
+
+          <div class="api-table-wrap" style="margin-top:20px;">
+            <table class="api-table">
+              <thead>
+                <tr><th>Status</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>RECEIVED</code></td><td>Ticket persisted, not yet processed.</td></tr>
+                <tr><td><code>QUARANTINED</code></td><td>Injection inspection flagged the ticket; processing stopped.</td></tr>
+                <tr><td><code>ROUTED_TO_SUPPORT</code></td><td>Non-billing ticket routed to the support team.</td></tr>
+                <tr><td><code>INVESTIGATING</code></td><td>Billing ticket: duplicate not confirmed by the provider.</td></tr>
+                <tr><td><code>PENDING_FINANCE_APPROVAL</code></td><td>Duplicate confirmed; awaiting a human finance decision.</td></tr>
+                <tr><td><code>REFUND_REJECTED</code></td><td>Finance rejected the refund.</td></tr>
+                <tr><td><code>NEEDS_INFORMATION</code></td><td>Finance needs more information before deciding.</td></tr>
+                <tr><td><code>REFUND_SUCCEEDED</code></td><td>Refund executed and the customer-facing reply passed grounding.</td></tr>
+                <tr><td><code>REFUND_SUCCEEDED_REPLY_REVIEW</code></td><td>Refund succeeded but the customer reply needs review before sending.</td></tr>
+                <tr><td><code>REFUND_PENDING</code></td><td>Refund initiated and still being processed.</td></tr>
+                <tr><td><code>REFUND_FAILED</code></td><td>Duplicate confirmed but the refund could not complete.</td></tr>
+                <tr><td><code>PROCESSING_ERROR</code></td><td>Ticket processing raised an exception.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="api-example">
+            <h4>Error codes</h4>
+            <pre><code>404  Ticket not found (GET /tickets/{id}, GET /tickets/{id}/audit)
+409  Finance decision already recorded (POST /tickets/{id}/approval)
+422  Validation error (POST /tickets body missing subject/body)
+502  Ticket processing failed</code></pre>
+          </div>
+
+          <div class="api-note">
+            <strong>Live mode:</strong> set <code>MOCK_MODE=false</code>, <code>CLOCKED_API_KEY</code> and <code>TYPELLM_API_KEY</code>. The payment adapter remains a mock - implement a provider-specific adapter before any real refund integration. Never authorize or execute refunds based solely on model output.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="modal" id="modalAbout">
+    <div class="modal-backdrop" id="backdropAbout"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="closeAbout">&times;</button>
+      <div class="modal-body">
+        <div class="modal-header">
+          <div class="modal-icon about-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 200 200" fill="none">
+              <defs>
+                <linearGradient id="clockGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6366f1" />
+                  <stop offset="100%" stop-color="#22d3ee" />
+                </linearGradient>
+                <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              <circle cx="100" cy="100" r="78" stroke="url(#clockGrad2)" stroke-width="10" fill="none" stroke-linecap="round" />
+              <circle cx="100" cy="100" r="78" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.15" />
+              <g stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.5">
+                <line x1="100" y1="26" x2="100" y2="36" />
+                <line x1="100" y1="164" x2="100" y2="174" />
+                <line x1="26" y1="100" x2="36" y2="100" />
+                <line x1="164" y1="100" x2="174" y2="100" />
+                <line x1="58.6" y1="58.6" x2="66.2" y2="66.2" />
+                <line x1="133.8" y1="133.8" x2="141.4" y2="141.4" />
+                <line x1="58.6" y1="141.4" x2="66.2" y2="133.8" />
+                <line x1="133.8" y1="58.6" x2="141.4" y2="66.2" />
+                <line x1="78.6" y1="30.8" x2="84.2" y2="34.6" />
+                <line x1="115.8" y1="165.4" x2="121.4" y2="161.4" />
+                <line x1="30.8" y1="121.4" x2="34.6" y2="115.8" />
+                <line x1="165.4" y1="78.6" x2="161.4" y2="84.2" />
+              </g>
+              <path d="M 100 100 L 132 42 L 158 42 L 158 98 L 132 98 Z" fill="#ffffff" opacity="0.9" />
+              <path d="M 100 100 L 132 42" stroke="#6366f1" stroke-width="7" stroke-linecap="round" fill="none" />
+              <g fill="#ffffff" opacity="0.6">
+                <circle cx="133" cy="50" r="1.8" />
+                <circle cx="133" cy="60" r="1.8" />
+                <circle cx="133" cy="70" r="1.8" />
+                <circle cx="133" cy="80" r="1.8" />
+                <circle cx="133" cy="90" r="1.8" />
+              </g>
+              <circle cx="100" cy="100" r="6" fill="#22d3ee" filter="url(#glow2)" />
+              <circle cx="100" cy="100" r="10" stroke="#22d3ee" stroke-width="2" fill="none" opacity="0.6" />
+              <line x1="100" y1="100" x2="122" y2="72" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.9" />
+            </svg>
+          </div>
+          <div>
+            <h2>About Clocked Support Intelligence</h2>
+            <div class="modal-tag">Reference Engine &bull; v1.0.0</div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3>Overview</h3>
+          <p>
+            The <strong>Clocked Support Intelligence Engine</strong> is a Python/FastAPI reference project that
+            combines <strong>Clocked</strong> security APIs and <strong>TypeLLM</strong> typed workflows for
+            support-ticket triage and duplicate-charge resolution. It processes incoming support tickets through a
+            deterministic pipeline: injection inspection, PII protection, structured extraction, decision logic,
+            TypeLLM classification, category-specific handling, payment evidence lookup, finance approval, idempotent
+            refunds, and Clocked grounding of customer-facing replies.
+          </p>
+        </div>
+        <div class="modal-section">
+          <h3>How It Works</h3>
+          <ol class="steps">
+            <li><strong>Ticket received</strong> - Persisted to SQLite with a <code>TICKET_RECEIVED</code> audit event.</li>
+            <li><strong>Clocked Injection</strong> - Inspects untrusted content; suspicious tickets are quarantined.</li>
+            <li><strong>Clocked PII</strong> - Protects text used downstream.</li>
+            <li><strong>Clocked Extract &amp; Decide</strong> - Produce structured billing evidence.</li>
+            <li><strong>TypeLLM</strong> - Classifies category, urgency, and handling advice using typed questions.</li>
+            <li><strong>Category handler</strong> - Billing tickets run payment lookup/duplicate confirmation.</li>
+            <li><strong>Finance approval</strong> - Human decision (approved / rejected / needs_information).</li>
+            <li><strong>Refund</strong> - Idempotent refund executed keyed by ticket.</li>
+            <li><strong>Clocked Grounding</strong> - Verifies the customer-facing refund claim before sending.</li>
+            <li><strong>Persist outcome</strong> - Audit trail and final status recorded.</li>
+          </ol>
+        </div>
+        <div class="modal-section">
+          <h3>Tech Stack</h3>
+          <div class="tech-tags">
+            <span>FastAPI</span><span>Python 3.10+</span><span>SQLite</span><span>SQLAlchemy</span><span>Pydantic</span>
+            <span>Clocked SDK</span><span>TypeLLM</span><span>HTML5 / CSS3 / JS</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <p>Mock mode enabled by default - no real money moves and no external network calls.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finance Approval Modal -->
+  <div class="modal" id="modalFinanceApproval">
+    <div class="modal-backdrop" id="backdropFinanceApproval"></div>
+    <div class="modal-content" id="modalFinanceContent">
+      <button class="modal-close" id="closeFinanceApproval" aria-label="Close">&times;</button>
+      <div class="modal-body" id="modalFinanceBody" style="padding:0;"></div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">
+    <div class="toast-body"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
