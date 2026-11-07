@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
   <diagram name="Clocked Support Intelligence Engine Architecture" id="clocked-arch">
-    <mxGraphModel dx="1603" dy="975" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1042" dy="634" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -47,12 +47,6 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="153" y="48" as="sourcePoint" />
             <mxPoint x="353" y="48" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_bc" edge="1" parent="1" source="n_b" style="endArrow=classic;html=1;strokeColor=#666666;dashed=1;" target="n_c" value="">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="453" y="73" as="sourcePoint" />
-            <mxPoint x="483" y="603" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="e_bd" edge="1" parent="1" source="n_b" style="endArrow=classic;html=1;strokeColor=#666666;" target="n_d" value="">

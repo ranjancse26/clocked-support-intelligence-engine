@@ -1,6 +1,5 @@
 flowchart TD
  A[Email / Chat / Portal] --> B[FastAPI Support API]
- B --> C[Ticket Store and Audit]
  B --> D[Clocked Injection]
  D --> E[Clocked PII]
  E --> F[Clocked Extract and Decide]
@@ -11,4 +10,4 @@ flowchart TD
  J --> K[Refund Adapter]
  K --> L[Clocked Grounding]
  L --> M[Customer Reply]
- M --> C
+ M --> C[Ticket Store and Audit]
