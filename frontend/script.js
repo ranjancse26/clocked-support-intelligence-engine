@@ -259,14 +259,13 @@ function renderTicketsGrid(tickets) {
   `).join("");
 
   els.ticketsGrid.querySelectorAll(".ticket-card").forEach((card) => {
-    const analyze = async () => {
-      const id = card.dataset.id;
-      if (!id) return;
-      els.ticketIdInput.value = id;
-      await loadTicket(id);
-      showSection("ticket-analysis");
-      els.ticketView?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
+      const analyze = async () => {
+        const id = card.dataset.id;
+        if (!id) return;
+        els.ticketIdInput.value = id;
+        await loadTicket(id);
+        showSection("ticket-analysis");
+      };
     card.addEventListener("click", analyze);
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -854,6 +853,25 @@ html += `
       if (chevron) chevron.style.transform = isOpen ? "rotate(180deg)" : "";
     });
   });
+
+  // Auto-open the analysis result accordions and scroll to them so users
+  // see the analysis results immediately after navigation.
+  const resultIds = ["acc-extraction", "acc-decide", "acc-injection", "acc-pii"];
+  if (ticket.category === "billing") resultIds.push("acc-payment");
+  resultIds.forEach((id) => {
+    const body = document.getElementById(id);
+    const item = body ? body.parentElement : null;
+    if (item && !item.classList.contains("open")) {
+      item.classList.add("open");
+      const chevron = item.querySelector(".acc-chevron");
+      if (chevron) chevron.style.transform = "rotate(180deg)";
+    }
+  });
+
+  const firstResult = document.getElementById("acc-extraction");
+  if (firstResult) {
+    firstResult.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function renderAuditDetails(details) {
